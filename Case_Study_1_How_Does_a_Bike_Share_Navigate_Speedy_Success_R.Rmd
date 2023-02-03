@@ -1,0 +1,568 @@
+---
+title: "Case_Study_1_How_Does_a_Bike_Share_Navigate_Speedy_Success_R"
+author: "steve yuan"
+date: "2023-01-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This is an experimental data analysis project.
+
+Cyclistic is a bike-share company in Chicago. The director of marketing believes the company’s future success depends on maximizing the number of annual memberships. Therefore, My team will design a new marketing strategy from data insights to convert casual riders into annual members.
+
+Three questions will guide the future marketing program:
+
+  1. How do annual members and casual riders use Cyclistic bikes diﬀerently?
+
+  2. Why would casual riders buy Cyclistic annual memberships?
+
+  3. How can Cyclistic use digital media to inﬂuence casual riders to become members?
+
+## Step 1: ASK
+
+### Stackholders 
+
+#### Executive Team
+
+  - **Lily Moreno**: The director of marketing and your manager, who is responsible for the development of campaigns and initiatives to promote the bike-share program.
+  - **Cyclistic executive team**: detail-oriented, they will decide whether to approve the recommended marketing program.
+
+#### Data science Team
+
+  - **Cyclistic executive team**: focus on new angles, who are responsible for collecting, analyzing, and reporting data that helps guide Cyclistic marketing strategy. I am a part of this team.
+
+#### Target Subjects
+
+  - casual riders
+  - annual members
+
+### Business Task
+
+As a member of the data analysis team, my main tasks：
+  - Analyzing Cyclistic's historical bicycle trip data.
+  - Analyzing the behavior and preferences of casual riders versus annual members and comparing them to identify trends.
+  - Informing marketing strategies developed by Cyclistic based on analytical insights.
+  - Goal: To help Cyclistic boost annual members and drive profitable growth.
+
+## Step 2: Prepare
+
+### 1.Where is your data located?
+
+Cyclistic is a ﬁctional company. The data set used is [previous 12 months of Cyclistic trip data](https://divvy-tripdata.s3.amazonaws.com/index.html) . The above data sets are stored on my computer for the duration of the project.
+
+### 2.How is data organized?
+
+The project data set includes Cyclistic’s historical trip data for the last 12 months to analyze and identify trends, starting from Jan 2022 to Dec 2022. These files are formatted as CSV files, and each file includes 13 columns.
+
+### 3.Are there issues with bias or credibility in this data? Does your data ROCCC?
+
+Cyclistic's historical trip data is public data provided by Motivate International Inc, it includes all the ride information of the household and is updated monthly, so it is Reliable, Original, Comprehensive, Current, and Cited, which meets the ROCCC requirements are met without bias or credibility issues.
+
+### 4. How are you addressing licensing, privacy, security, and accessibility?
+
+The data sets used in this project were collected by Motivate International Inc. under the following [license](https://ride.divvybikes.com/data-license-agreement) and do not contain any personal information about the riders and do not violate privacy.
+
+### 5.How did you verify the data’s integrity?
+
+This question can be verified in four dimensions: accuracy, completeness, consistency, and trustworthiness. The dataset used in this project was provided by Motivate International Inc, and the trustworthiness has been previously demonstrated. Meanwhile, the dataset includes complete data for 12 consecutive months, and each CSV file is organized using the same number of columns and the same data type, thus satisfying the project requirements.
+
+### 6.How does it help you answer your question?
+
+By using R to organize and analyze projects, extract valuable iconographic information, and visualize them, it can help us accomplish our project goals and tasks.
+
+### 7.Are there any problems with the data?
+
+Yes, there were some problems and challenges encountered during the progress of the project, mainly
+
+  1. The project dataset includes 12 CSV documents with a total volume of over 1GB, which cannot be satisfied by using Excel alone anymore, so a combination of SQL, R and Tableau was used to complete it.
+  2. The dataset includes some duplicate data and "NA" value, which requires data cleaning.
+  3. The August start time data format is a numeric value, which needs to be converted to a date ("yyyy/m/d hh:mm:ss"), and then imported into Rstudio for processing.
+  
+  
+## Step 3:Process
+
+### 1. What tools are you choosing and why?
+
+Considering the size and complexity of the dataset, I used SQL, R and visualization tools to complete this project, specifically using the following software：
+  - Sequel Pro + mysql server (data management)
+  - Rstudio (data organization, cleaning, and visualization)
+  - Tableau (data visualization)
+
+### 2. Have you ensured your data’s integrity?
+
+Yes, I performed the following checks on the 12 documents required for the project, among others.
+  - Check empty rows and columns
+  - Check missing values
+  - Check for extra spaces
+  - Check for duplicate records
+  - Check for unique values
+All 12 files were combined into one data set after initial review was completed.
+
+## Step 4: Data Analysis & Data Visualizations
+
+### Setting up environment
+
+  This project uses RStdio Desktop for data collation, data cleaning and visualization.
+  
+  - Install packages, including tidyverse, janitor, scales, dplyr
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+install.packages("tidyverse")
+install.packages("janitor")
+install.packages("scales")
+install.packages("lubridate")
+install.packages("dplyr")  
+```
+
+  - Load all these packages
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+library("tidyverse")
+library("janitor")
+library("scales")
+library("lubridate")
+library("dplyr")
+library("hms")
+```
+
+### Data Import
+  - Use read.csv() to read data
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+jan_2022 <- read.csv("/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/original_data/202201-divvy-tripdata.csv")
+feb_2022 <- read.csv("/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/original_data/202202-divvy-tripdata.csv")
+mar_2022 <- read.csv("/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/original_data/202203-divvy-tripdata.csv")
+apr_2022 <- read.csv("/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/original_data/202204-divvy-tripdata.csv")
+may_2022 <- read.csv("/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/original_data/202205-divvy-tripdata.csv")
+jun_2022 <- read.csv("/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/original_data/202206-divvy-tripdata.csv")
+jul_2022 <- read.csv("/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/original_data/202207-divvy-tripdata.csv")
+aug_2022 <- read.csv("/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/original_data/202208-divvy-tripdata.csv")
+sep_2022 <- read.csv("/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/original_data/202209-divvy-tripdata.csv")
+oct_2022 <- read.csv("/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/original_data/202210-divvy-tripdata.csv")
+nov_2022 <- read.csv("/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/original_data/202211-divvy-tripdata.csv")
+dec_2022 <- read.csv("/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/original_data/202212-divvy-tripdata.csv")
+```
+  
+  - Check column names
+```{r}
+colnames(jan_2022)
+colnames(feb_2022)
+colnames(mar_2022)
+colnames(apr_2022)
+colnames(may_2022)
+colnames(jun_2022)
+colnames(jul_2022)
+colnames(aug_2022)
+colnames(sep_2022)
+colnames(oct_2022)
+colnames(nov_2022)
+colnames(dec_2022)
+```
+
+  - Check total number of records
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+sum(nrow(jan_2022) + nrow(feb_2022) + nrow(mar_2022) 
+    + nrow(apr_2022) + nrow(may_2022) + nrow(jun_2022) 
+    + nrow(jul_2022) + nrow(aug_2022) + nrow(sep_2022) 
+    + nrow(oct_2022) + nrow(nov_2022) + nrow(dec_2022))
+```
+  
+  - Combine these data into a single dataset
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+trip_final <- bind_rows(jan_2022,feb_2022,mar_2022,
+                    apr_2022,may_2022,jun_2022,
+                    jul_2022,aug_2022,sep_2022,
+                    oct_2022,nov_2022,dec_2022)
+```
+
+  - Save the combined files
+```{r}
+write.csv(trip_final,file = "/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/final_data/trip_final.csv",row.names = FALSE)
+```
+  
+  
+###  Data validation
+```{r}
+str(trip_final)
+View(head(trip_final))
+View(tail(trip_final))
+dim(trip_final)
+summary(trip_final)
+names(trip_final)
+```
+  
+### Data cleaning
+
+  - import data
+```{r}
+trip_final <- read_csv("/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/final_data/trip_final.csv")
+```
+
+  - create new column,including start_hour, week_day, month, year based on the "started_at" column.
+```{r}
+
+# Method A
+trip_final$start_hour <- strftime(trip_final$started_at, format = "%H", tz = "UTC")
+trip_final$week_day <- strftime(trip_final$started_at, "%a")
+trip_final$month <- strftime(trip_final$started_at, "%b")
+trip_final$year <- strftime(trip_final$started_at, "%Y")
+# Method B
+#trip_final$start_hour <- hour(trip_final$started_at)
+#trip_final$week_day <- wday(trip_final$started_at)
+#trip_final$month <- month(trip_final$started_at)
+#trip_final$year <- year(trip_final$started_at)
+```
+
+  - Add ride_time column
+```{r}
+trip_final$riding_time <- as.numeric(difftime(trip_final$ended_at,trip_final$started_at, units = "mins"))
+```
+
+ - Rename Columns，"member_casual" rename as "customer_type"，"rideable_type" rename as "bike_type", "started_at" rename as "start_time", "end_at" rename as "end_time".
+```{r}
+trip_final <- rename(trip_final, customer_type = member_casual, bike_type = rideable_type, start_time = started_at, end_time = ended_at)
+```
+
+  - select the data we are going to use
+```{r}
+trip_final <- trip_final %>% 
+  select(ride_id, customer_type, bike_type, start_hour, week_day, month, year, start_time, end_time, riding_time)
+```
+
+  - Data Validation
+```{r}
+str(trip_final)
+View(head(trip_final))
+View(tail(trip_final))
+dim(trip_final)
+summary(trip_final)
+names(trip_final)
+```
+
+  - Count rows with "NA" values
+```{r}
+colSums(is.na(trip_final))
+```
+
+  - use complete.cases function to return a logical vector indicating which cases are complete
+```{r}
+trip_final <- trip_final[complete.cases(trip_final), ]
+```
+
+  - Remove duplicates data
+```{r}
+trip_final <- distinct(trip_final)
+```
+
+  - Remove "NA", empty, and missing values
+```{r}
+trip_final <- na.omit(trip_final)
+trip_final <- remove_empty(trip_final)
+trip_final <- remove_missing(trip_final)
+```
+  
+  - Remove data with start_time greater than end_time
+```{r}
+trip_final<- trip_final %>% 
+  filter(start_time< end_time)
+```
+
+  - Riding time is usually limited to one day (1440 minutes), so data with more than 1440 minutes of continuous riding time should be deleted
+```{r}
+View(filter(trip_final, trip_final$riding_time>1440 ))
+trip_final <- trip_final[!trip_final$riding_time>1440,] 
+```
+  
+  - Data Validation
+```{r}
+str(trip_final)
+View(head(trip_final))
+View(tail(trip_final))
+dim(trip_final)
+summary(trip_final)
+names(trip_final)
+```
+  
+  - Save the collated data for the next data analysis
+
+```{r}
+write.csv(trip_final,file = "/Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/clean_final_data/clean_trip_final.csv",row.names = FALSE)
+```
+
+
+### Data Analysis
+
+  - Loading data
+```{r}
+clean_trip_final <- read_csv("//Users/steveyuan/Documents/github_files/Google-Data-Analytics_Case-Study-1/clean_final_data/clean_trip_final.csv")
+```
+
+  - Data Validation
+
+```{r}
+str(clean_trip_final)
+View(head(clean_trip_final))
+View(tail(clean_trip_final))
+dim(clean_trip_final)
+summary(clean_trip_final)
+names(clean_trip_final)
+```
+
+Let's start analyzing the data.
+  
+
+```{r}
+df <- clean_trip_final
+df %>% 
+  group_by(customer_type) %>% 
+  summarize(count = length(ride_id),
+            percentage_of_total = (length(ride_id)/nrow(df))*100)
+```
+  
+  Based on the above analysis, it can be seen that in 2022, about 59% of the customers are ANNUAL members and about 41% of the customers are CASUAL riders
+  
+  Let's plot the above table.
+```{r}
+blank_theme <- theme_minimal()+
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    panel.border = element_blank(),
+    panel.grid=element_blank(),
+    axis.ticks = element_blank(),
+    plot.title=element_text(size=14, face="bold")
+  )
+
+ggplot(data = df, mapping = aes(x = "customer_type", fill = customer_type)) +
+  geom_bar(stat = "count", width = 0.5, position = "stack") +
+  coord_polar("y", start = 0) +
+  scale_fill_manual(values =c ('#999999','#E69F00')) +
+  blank_theme +
+  theme(legend.position="bottom") +
+  labs(title="Last year, annual membership users accounted for 60%",subtitle="Annual Member(59%) vs Casual Member(41%) in 2022",caption = "made by steve")
+```
+  
+
+```{r}
+# bar chart
+#ggplot(data=df) +
+#  geom_bar(mapping=aes(x=customer_type, fill=customer_type), width=0.5, stat="count") +
+#  scale_y_continuous(labels=comma) +
+#  scale_fill_manual(values =c ('#999999','#E69F00')) +
+#  theme(legend.position="none") +
+#  labs(x = NULL, y = "Percentage", title="59% of total customer are annual membership",subtitle="Member vs Casual distribution in 2022",caption = "made by steve")
+``` 
+
+
+   2. Daily Car Situation
+
+  - Analysis of each hour of usage
+```{r}
+start_hour_df <- df %>% 
+  group_by(start_hour) %>%
+  summarize(count=length(ride_id),
+            percentage_of_total=(length(ride_id)/nrow(df))*100,
+            members_count=sum(customer_type=="member"),
+            members_percent=(sum(customer_type=="member")/length(ride_id))*100,
+            casual_count=sum(customer_type=="casual"),
+            casual_percent=(sum(customer_type=="casual")/length(ride_id))*100) %>% 
+  arrange(start_hour)
+start_hour_df
+```
+
+Let's plot the above table
+```{r}
+ggplot(data = df) +
+  geom_bar(mapping = aes(x = start_hour, fill = customer_type), position = "stack") +
+  scale_y_continuous(labels = comma) + 
+  scale_fill_manual(values =c ('#999999','#E69F00')) +
+  theme(legend.position="bottom") +
+  #coord_flip() +
+  labs(x = "Times", y = "Number of rides", title = "17:00 daily is the peak of car use",subtitle = "Daily Car Situation",caption = "made by steve")
+```
+
+
+Divide each day into three periods: morning, afternoon and evening, and further analyze
+```{r}
+df <- mutate(df, hour_of_the_day=ifelse(df$start_hour<12, "Morning",
+                                        ifelse(df$start_hour>=12 & df$start_hour<=19, "Afternoon", "Evening")))
+```
+
+```{r}
+hour_type_df <- df %>% 
+  group_by(hour_of_the_day) %>%
+  summarize(count=length(ride_id),
+            percentage_of_total=(length(ride_id)/nrow(df))*100,
+            members_count=sum(customer_type=="member"),
+            members_percent=(sum(customer_type=="member")/length(ride_id))*100,
+            casual_count=sum(customer_type=="casual"),
+            casual_percent=(sum(customer_type=="casual")/length(ride_id))*100)
+hour_type_df
+```
+Mornings had more number of annual riders whereas evening has more number of casual riders. However, afternoon had more number of total riders compared to mornings or evenings. 
+
+Let's plot the above table
+```{r}
+df$week_day = factor(df$week_day, levels=c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))
+
+ggplot(data = df) +
+  geom_bar(mapping = aes(x = hour_of_the_day, fill = customer_type), width=0.5, position = "dodge") +
+  scale_y_continuous(labels=comma)+
+  scale_fill_manual(values =c ('#999999','#E69F00')) +
+  facet_wrap(~week_day) +
+  theme(legend.position="bottom") +
+  labs(x = NULL, y = "Number of rides", title="Annual members use significantly more cars in the morning and afternoon", subtitle="Evening annual membership and casual membership are close to each other in terms of usage", caption = "made by steve")
+```
+  
+   3. check how number of riders vary per each week of the day
+  
+```{r}
+df %>% 
+  group_by(week_day) %>%
+  summarize(count=length(ride_id),
+            percentage_of_total=(length(ride_id)/nrow(df))*100,
+            members_count=sum(customer_type=="member"),
+            members_percent=(sum(customer_type=="member")/length(ride_id))*100,
+            casual_count=sum(customer_type=="casual"),
+            casual_percent=(sum(customer_type=="casual")/length(ride_id))*100)
+df
+```
+
+Let's plot the above table.
+```{r}
+df$week_day = factor(df$week_day, levels=c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))
+
+ggplot(data = df) +
+  geom_bar(mapping = aes(x = week_day, fill = customer_type), width=0.5, position = "fill") +
+  scale_y_continuous(labels=comma) +
+  scale_fill_manual(values =c ('#999999','#E69F00')) +
+  coord_flip() +
+  theme(legend.position="bottom") +
+  labs(x = NULL, y = NULL, title="More annual members use the vehicle on weekdays (Monday to Friday)",subtitle="Weekend car usage is close to both members",caption = "made by steve")
+```
+
+  
+  4.Analyze changes in trends from month to month
+  
+```{r}
+df %>% 
+  group_by(month) %>%
+  summarize(count=length(ride_id),
+            percentage_of_total=(length(ride_id)/nrow(df))*100,
+            members_count=sum(customer_type=="member"),
+            members_percent=(sum(customer_type=="member")/length(ride_id))*100,
+            casual_count=sum(customer_type=="casual"),
+            casual_percent=(sum(customer_type=="casual")/length(ride_id))*100) %>% 
+  arrange(month)
+```
+
+Let's plot the above table
+```{r}
+df$month = factor(df$month, levels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+ggplot(data = df) +
+  geom_bar(mapping = aes(x = month, fill = customer_type), width=0.5, position = "stack") +
+  # coord_flip() +
+  scale_y_continuous(labels=comma) + 
+  scale_fill_manual(values =c ('#999999','#E69F00')) +
+  theme(legend.position="bottom") +
+  labs(x = NULL, y = "Numbers of rides", title="June to August is the peak period for car use throughout the year",subtitle="January, February and December are the months with the least number of rides",caption = "made by steve")
+```
+  It can also be seen that there is little difference in car usage between annual and regular users during the high season (June to August), while annual members use significantly more cars than regular members during the low season (January, February and December).
+  
+```{r}
+df$month = factor(df$month, levels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+ggplot(data = df) +
+  geom_bar(mapping = aes(x = month, fill = customer_type), width=0.5, position = "fill") +
+  # coord_flip() +
+  scale_y_continuous(labels=comma) + 
+  scale_fill_manual(values =c ('#999999','#E69F00')) +
+  theme(legend.position="bottom") +
+  labs(x = NULL, y = "Percentage", title="Annual user and regular user usage are close in the peak season (June to August)",subtitle=" annual membership usage is significantly higher than regular membership on Off-season (January, February and December)",caption = "made by steve")
+```
+
+  5. Check what types of bikes do riders usually ride
+```{r}
+df %>% 
+  group_by(bike_type) %>%
+  summarize(count=length(ride_id),
+            percentage_of_total=(length(ride_id)/nrow(df))*100,
+            members_count=sum(customer_type=="member"),
+            members_percent=(sum(customer_type=="member")/length(ride_id))*100,
+            casual_count=sum(customer_type=="casual"),
+            casual_percent=(sum(customer_type=="casual")/length(ride_id))*100)
+```
+
+Let's plot the above table
+```{r}
+df$week_day = factor(df$week_day, levels=c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))
+
+ggplot(data = df) +
+  geom_bar(mapping = aes(x = bike_type, fill = customer_type), width=0.5, position = "fill") +
+  scale_y_continuous(labels=comma)+
+  scale_fill_manual(values =c ('#999999','#E69F00')) +
+  facet_wrap(~week_day)+
+  theme(axis.text.x = element_text(angle=25), legend.position="bottom") +
+  labs(x = NULL, y = NULL, title="Regardless of the type of customer, the demand for cars is mainly focused on classic and electric bikes",subtitle="Only casual members have chosen docked bikes",caption = "made by steve")
+```
+ 
+  6. consider riding_time feature
+
+```{r}
+summary(df$riding_time)
+```
+
+  - checking the riding time of both members and casual riders
+
+```{r}
+df %>% 
+  group_by(customer_type) %>% 
+  summarize(mean=mean(riding_time),
+            first_quarter=quantile(riding_time, 0.25),
+            median=median(riding_time),
+            third_quarter=quantile(riding_time, 0.75),
+            IQR = third_quarter-first_quarter)
+```
+
+
+  - Further analysis allows the calculation of each month's ride.
+  
+```{r}
+df %>% 
+  group_by(month) %>% 
+  summarize(mean=mean(riding_time),
+            first_quarter=quantile(riding_time, 0.25),
+            median=median(riding_time),
+            third_quarter=quantile(riding_time, 0.75),
+            IQR = third_quarter-first_quarter)
+```
+
+The last box plots were created using tableau.
+
+## Step 5: Data insights and Recommendations
+
+### Key Takeaways
+
+  - Annual members use the shared bike service more often on weekdays, while casual users use it more frequently on weekends.
+  
+  - There was a clear spike during the off-hours peak (16:00 to 19:00), when annual membership usage was higher.
+  
+  - The effect of seasonal factors on bike-sharing services is evident, with significant peaks in the summer and significant troughs in the winter.
+  
+  - The most popular type of bike is the classic bike, while docked bikes are rarely used and annual members hardly ever use docked bikes.
+  
+  - Casual users have a greater preference for longer rides, with an average ride time 1.7 times longer than annual users.
+  
+### Recommendations
+
+  - Increase promotions for regular users, especially during the summer and weekends, to attract them to convert to annual subscribers.
+  
+  - Increase daily vehicle deployment during peak usage periods to further improve user experience.
+  
+  - Further enhance the experience of using classic bicycles and improve user satisfaction.
+  
+  - Further evaluate the reasons for the low usage of docked bicycles and make countermeasures accordingly.
