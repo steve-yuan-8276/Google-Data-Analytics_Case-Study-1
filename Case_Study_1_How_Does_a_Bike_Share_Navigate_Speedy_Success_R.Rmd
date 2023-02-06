@@ -311,7 +311,9 @@ summary(clean_trip_final)
 names(clean_trip_final)
 ```
 
-Let's start analyzing the data.
+Let's start analyzing the data. 
+
+1. analysis of user composition
   
 
 ```{r}
@@ -393,6 +395,7 @@ df <- mutate(df, hour_of_the_day=ifelse(df$start_hour<12, "Morning",
                                         ifelse(df$start_hour>=12 & df$start_hour<=19, "Afternoon", "Evening")))
 ```
 
+   - Statistics on the use of two customer groups in the morning, afternoon and evening
 ```{r}
 hour_type_df <- df %>% 
   group_by(hour_of_the_day) %>%
@@ -527,25 +530,30 @@ df %>%
             third_quarter=quantile(riding_time, 0.75),
             IQR = third_quarter-first_quarter)
 ```
+Let's plot the above table
 
-
-  - Further analysis allows the calculation of each month's ride.
-  
 ```{r}
-df %>% 
-  group_by(month) %>% 
-  summarize(mean=mean(riding_time),
-            first_quarter=quantile(riding_time, 0.25),
-            median=median(riding_time),
-            third_quarter=quantile(riding_time, 0.75),
-            IQR = third_quarter-first_quarter)
+# Identify outliers
+upper <- quantile(clean_df$riding_time, 0.75) + 1.5 * IQR(clean_df$riding_time)
+lower <- quantile(clean_df$riding_time, 0.25) - 1.5 * IQR(clean_df$riding_time)
+outliers <- clean_df$riding_time[clean_df$riding_time > upper | clean_df$riding_time < lower]
+
+# Replace outliers with NA
+clean_df$riding_time[clean_df$riding_time > upper | clean_df$riding_time < lower] <- NA
+
+# Plot the data
+ggplot(data = clean_df, aes(x = 1, y = riding_time)) + 
+  geom_boxplot() +
+  scale_y_continuous(limits = c(0, 200)) +
+  geom_point(data = data.frame(outliers), aes(x = 1, y = outliers), color = "red", size = 4)
+  labs(title="Riding time analysis",caption = "made by steve")
 ```
 
-The last box plots were created using tableau.
+
 
 ## Step 5: Data insights and Recommendations
 
-### Key Takeaways
+### Data insights
 
   - Annual members use the shared bike service more often on weekdays, while casual users use it more frequently on weekends.
   
