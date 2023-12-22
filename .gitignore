@@ -1,4 +1,5 @@
-
+.*
 .DS_Store
 .Rhistory
-Python-Solution/TripData.ipynb
+*.xml
+*.ipynb
