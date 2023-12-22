@@ -18,6 +18,11 @@ Therefore, my team wants to understand how casual riders and annual members use 
 
 - **Cyclistic executive team**: The notoriously detail-oriented executive team will decide whether to approve the recommended marketing program.
 
+## Solution
+
+- [R Solution](https://github.com/steve-yuan-8276/Google-Data-Analytics_Case-Study-1/tree/main/R-Solution "Click")
+- [Python Solution](https://github.com/steve-yuan-8276/Google-Data-Analytics_Case-Study-1/tree/main/Python-Solution "Click")
+
 ## Dataset
 
 This is an experimental project, Cyclistic is a ﬁctional company. The data set used is [previous 12 months of Cyclistic trip data](https://divvy-tripdata.s3.amazonaws.com/index.html)
